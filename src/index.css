@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", system-ui, sans-serif;
+  --font-serif: "Fraunces", Georgia, serif;
+  
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-surface: var(--bg-surface);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-inverted: var(--text-inverted);
+  
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-primary-hover: var(--accent-primary-hover);
+  --color-accent-secondary: var(--accent-secondary);
+  
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+}
+
+@layer base {
+  :root {
+    /* Light Theme - Warm, textured, sophisticated */
+    --bg-primary: #F7F5F0;
+    --bg-secondary: #EBE7DF;
+    --bg-surface: #FFFFFF;
+    
+    --text-primary: #1A211D;
+    --text-secondary: #4A5652;
+    --text-inverted: #FCFBF9;
+    
+    --accent-primary: #D36135; /* Vibrat terra-cotta */
+    --accent-primary-hover: #B84A22;
+    --accent-secondary: #2C5545; /* Deep pine */
+    
+    --border-subtle: rgba(44, 85, 69, 0.1);
+    --border-strong: rgba(44, 85, 69, 0.25);
+  }
+
+  .dark {
+    /* Dark Theme - Midnight luminous amethyst */
+    --bg-primary: #0D0A11;
+    --bg-secondary: #14101A;
+    --bg-surface: #1E1726;
+    
+    --text-primary: #F2EBF7;
+    --text-secondary: #AEA1BD;
+    --text-inverted: #0D0A11;
+    
+    --accent-primary: #B266FF; /* Luminous violet */
+    --accent-primary-hover: #9A3DEB;
+    --accent-secondary: #F0A500; /* Warm glow */
+    
+    --border-subtle: rgba(178, 102, 255, 0.15);
+    --border-strong: rgba(178, 102, 255, 0.3);
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary font-sans antialiased transition-colors duration-500 ease-in-out;
+    background-image: radial-gradient(var(--border-subtle) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+/* Base custom utilities & animations */
+@layer utilities {
+  .glass-panel {
+    @apply bg-bg-surface/80 backdrop-blur-md border border-border-subtle shadow-lg;
+  }
+  
+  .glass-panel-heavy {
+    @apply bg-bg-surface/95 backdrop-blur-xl border border-border-strong shadow-xl;
+  }
+
+  /* Staggered entrance animations */
+  @keyframes fade-slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-stagger-enter {
+    animation: fade-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+  }
+  
+  /* Stagger delays */
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+
+  /* Input styles focus glows */
+  .styled-input {
+    @apply bg-bg-secondary border border-border-subtle rounded-xl px-4 py-3 text-text-primary transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent-primary/50 focus:border-accent-primary;
+  }
+  
+  .styled-button {
+    @apply bg-accent-primary hover:bg-accent-primary-hover text-text-inverted font-medium rounded-xl px-6 py-3 transition-all duration-300 active:scale-[0.98] shadow-md hover:shadow-accent-primary/25 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+}
