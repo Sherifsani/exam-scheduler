@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { CalendarDays, MapPin, AlignLeft, BookOpen, Clock } from 'lucide-react';
+import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from './retroui/Card';
 import { Input } from './retroui/Input';
 import { Label } from './retroui/Label';
 import { Button } from './retroui/Button';
+import { Calendar } from './retroui/Calendar';
 import type { Exam } from '../types';
 
 interface ExamFormProps {
@@ -22,21 +24,38 @@ const COLORS = [
 export function ExamForm({ onAdd }: ExamFormProps) {
   const [courseName, setCourseName] = useState('');
   const [courseCode, setCourseCode] = useState('');
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState<Date>();
+  const [showCalendar, setShowCalendar] = useState(false);
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
+  
+  const calendarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+        setShowCalendar(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!courseName || !date || !startTime || !endTime || !location) return;
 
+    const formattedDate = format(date, 'yyyy-MM-dd');
+
     const newExam: Exam = {
       id: uuidv4(),
       courseName,
       courseCode,
-      date,
+      date: formattedDate,
       startTime,
       endTime,
       location,
@@ -48,7 +67,7 @@ export function ExamForm({ onAdd }: ExamFormProps) {
 
     setCourseName('');
     setCourseCode('');
-    setDate('');
+    setDate(undefined);
     setStartTime('');
     setEndTime('');
     setLocation('');
@@ -56,7 +75,7 @@ export function ExamForm({ onAdd }: ExamFormProps) {
   };
 
   return (
-    <Card className="rounded-none w-full">
+    <Card className="rounded-none w-full border-2 border-border shadow-sm">
       <CardHeader className="bg-primary border-b-2 border-border p-4">
         <CardTitle className="text-primary-foreground font-head tracking-tight uppercase flex items-center gap-2">
           <BookOpen className="w-5 h-5 shrink-0" /> Schedule Exam
@@ -85,17 +104,29 @@ export function ExamForm({ onAdd }: ExamFormProps) {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 relative" ref={calendarRef}>
               <Label className="uppercase text-xs font-bold tracking-wider flex items-center gap-1">
                 <CalendarDays className="w-3 h-3" /> Date *
               </Label>
-              <Input 
-                type="date" 
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded-none border-2 border-border shadow-xs font-sans"
-                required
-              />
+              <Button
+                type="button"
+                variant="outline"
+                className={`w-full justify-start text-left font-sans rounded-none border-2 border-border shadow-xs ${!date ? "text-muted-foreground" : ""}`}
+                onClick={() => setShowCalendar(!showCalendar)}
+              >
+                <CalendarDays className="mr-2 h-4 w-4" />
+                {date ? format(date, 'PPP') : "Pick a date"}
+              </Button>
+              {showCalendar && (
+                <div className="absolute top-full left-0 z-50 mt-2 bg-background border-2 border-border shadow-sm p-3 block">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={(d) => { setDate(d); setShowCalendar(false); }}
+                    initialFocus
+                  />
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -147,7 +178,7 @@ export function ExamForm({ onAdd }: ExamFormProps) {
             </div>
           </div>
 
-          <Button type="submit" className="w-full rounded-none py-6 text-lg uppercase shadow-[4px_4px_0_0_#000]">
+          <Button type="submit" disabled={!date} className="w-full rounded-none py-6 text-lg uppercase shadow-[4px_4px_0_0_#000]">
             Schedule It
           </Button>
         </form>

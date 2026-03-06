@@ -10,7 +10,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary selection:text-primary-foreground">
       {/* Navbar */}
-      <header className="border-b-2 border-border p-4 flex items-center justify-between sticky top-0 bg-background z-10">
+      <header className="border-b border-border p-4 flex items-center justify-between sticky top-0 bg-background z-100">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-primary border-2 border-border flex items-center justify-center font-head font-bold shadow-sm">
             E

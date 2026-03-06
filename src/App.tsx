@@ -26,7 +26,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground">
-      <header className="border-b-2 border-border p-4 flex items-center justify-between sticky top-0 bg-background z-10 shadow-sm">
+      <header className="border-b border-border p-4 flex items-center justify-between sticky top-0 bg-background z-10 shadow-sm">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => setShowApp(false)}>
           <div className="w-8 h-8 rounded-full bg-primary border-2 border-border flex items-center justify-center font-head font-bold shadow-sm">
             E

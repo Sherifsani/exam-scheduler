@@ -68,10 +68,10 @@ export function ExamList({ exams, onDelete, currentTheme }: ExamListProps) {
                 </div>
                 
                 <Button 
-                  variant="destructive"
+                  variant="outline" 
                   size="icon"
                   onClick={() => onDelete(exam.id)}
-                  className="rounded-none h-8 w-8 absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="shadow-none hover:bg-destructive hover:text-destructive-foreground hover:-translate-y-1 active:translate-y-0 rounded-none h-8 w-8 absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
                   title="Remove exam"
                 >
                   <Trash2 className="w-4 h-4" />
