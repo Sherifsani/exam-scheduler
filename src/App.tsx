@@ -1,124 +1,56 @@
-import { useState, useEffect } from 'react';
-import type { Theme, Exam } from './types';
-import ThemeToggle from './components/ThemeToggle';
-import ExamForm from './components/ExamForm';
-import ExamList from './components/ExamList';
-import { generateSchedulePDF } from './utils/pdfGenerator';
+import { useState } from 'react';
+import { LandingPage } from './components/LandingPage';
+import { ThemeToggle } from './components/ThemeToggle';
+import { ExamForm } from './components/ExamForm';
+import { ExamList } from './components/ExamList';
+import type { Exam, Theme } from './types';
 import './App.css';
 
 function App() {
+  const [showApp, setShowApp] = useState(false);
+  const [exams, setExams] = useState<Exam[]>([]);
   const [theme, setTheme] = useState<Theme>('system');
-  const [exams, setExams] = useState<Exam[]>(() => {
-    const saved = localStorage.getItem('exams');
-    return saved ? JSON.parse(saved) : [];
-  });
 
-  // Theme Syncing
-  useEffect(() => {
-    const root = window.document.documentElement;
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    
-    root.classList.remove('light', 'dark');
-    
-    if (theme === 'system') {
-      root.classList.add(systemTheme);
-    } else {
-      root.classList.add(theme);
-    }
-  }, [theme]);
+  if (!showApp) {
+    return <LandingPage onStart={() => setShowApp(true)} />;
+  }
 
-  // System Theme Listener
-  useEffect(() => {
-    if (theme !== 'system') return;
-    
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => {
-      const root = window.document.documentElement;
-      root.classList.remove('light', 'dark');
-      root.classList.add(mediaQuery.matches ? 'dark' : 'light');
-    };
-    
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme]);
-
-  // Save exams to localStorage
-  useEffect(() => {
-    localStorage.setItem('exams', JSON.stringify(exams));
-  }, [exams]);
-
+  // Handle adding exams
   const handleAddExam = (exam: Exam) => {
     setExams((prev) => [...prev, exam]);
   };
 
   const handleDeleteExam = (id: string) => {
-    setExams((prev) => prev.filter(e => e.id !== id));
-  };
-
-  const handleExportPDF = () => {
-    if (exams.length === 0) {
-      alert("No exams to export!");
-      return;
-    }
-    const currentTheme = theme === 'system' 
-      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') 
-      : theme;
-    
-    generateSchedulePDF(exams, currentTheme);
+    setExams((prev) => prev.filter((exam) => exam.id !== id));
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto transition-colors duration-500">
-      
-      {/* Header */}
-      <header className="w-full flex justify-between items-center mb-12 animate-stagger-enter delay-100">
-        <div>
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-accent-primary tracking-tight">
-            Schedule.
-          </h1>
-          <p className="text-text-secondary mt-1 max-w-sm text-sm">
-            Organize your exams, perfect your timing.
-          </p>
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground">
+      <header className="border-b-2 border-border p-4 flex items-center justify-between sticky top-0 bg-background z-10 shadow-sm">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setShowApp(false)}>
+          <div className="w-8 h-8 rounded-full bg-primary border-2 border-border flex items-center justify-center font-head font-bold shadow-sm">
+            E
+          </div>
+          <span className="font-head text-xl font-bold tracking-tight uppercase hidden sm:block">ExamScheduler</span>
         </div>
-        <ThemeToggle theme={theme} setTheme={setTheme} />
+        
+        <ThemeToggle theme={theme} onChange={setTheme} />
       </header>
 
-      {/* Main Content Area */}
-      <main className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pb-20">
-        
-        {/* Sidebar Form */}
-        <section className="lg:col-span-4 glass-panel rounded-2xl p-6 animate-stagger-enter delay-200 sticky top-10">
-          <h2 className="text-2xl font-serif font-semibold mb-6 border-b border-border-subtle pb-4">
-            Add Exam
-          </h2>
-          <ExamForm onAddExam={handleAddExam} />
-        </section>
-
-        {/* Schedule View */}
-        <section className="lg:col-span-8 space-y-6 animate-stagger-enter delay-300">
-          <div className="flex justify-between items-center glass-panel rounded-2xl px-6 py-4">
-            <h2 className="text-2xl font-serif font-semibold">Upcoming Exams</h2>
-            <button 
-              onClick={handleExportPDF}
-              className="styled-button text-sm py-2 px-4 shadow-none hover:shadow-md"
-              disabled={exams.length === 0}
-            >
-              Export PDF
-            </button>
-          </div>
-          
-          {exams.length === 0 ? (
-            <div className="glass-panel text-center text-text-secondary p-12 rounded-2xl border-dashed">
-              <p>No exams scheduled yet. Take a breather.</p>
-            </div>
-          ) : (
-            <ExamList exams={exams} onDeleteExam={handleDeleteExam} />
-          )}
-        </section>
-
+      <main className="max-w-6xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-4 space-y-6">
+          <ExamForm onAdd={handleAddExam} />
+        </div>
+        <div className="lg:col-span-8 space-y-6">
+          <ExamList 
+            exams={exams} 
+            onDelete={handleDeleteExam} 
+            currentTheme={theme === 'system' ? 'light' : theme} 
+          />
+        </div>
       </main>
     </div>
-  );
+  )  
 }
 
 export default App;

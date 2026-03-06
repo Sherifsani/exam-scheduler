@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { CalendarDays, MapPin, AlignLeft, BookOpen, Clock } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from './retroui/Card';
+import { Input } from './retroui/Input';
+import { Label } from './retroui/Label';
+import { Button } from './retroui/Button';
 import type { Exam } from '../types';
 
 interface ExamFormProps {
-  onAddExam: (exam: Exam) => void;
+  onAdd: (exam: Exam) => void;
 }
 
 const COLORS = [
-  'bg-accent-primary', 
-  'bg-accent-secondary', 
-  'bg-blue-600', 
-  'bg-purple-600', 
-  'bg-rose-500'
+  'bg-primary', 
+  'bg-accent', 
+  'bg-[#4ade80]', 
+  'bg-[#60a5fa]', 
+  'bg-[#c084fc]'
 ];
 
-export default function ExamForm({ onAddExam }: ExamFormProps) {
+export function ExamForm({ onAdd }: ExamFormProps) {
   const [courseName, setCourseName] = useState('');
   const [courseCode, setCourseCode] = useState('');
   const [date, setDate] = useState('');
@@ -40,9 +44,8 @@ export default function ExamForm({ onAddExam }: ExamFormProps) {
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
     };
 
-    onAddExam(newExam);
+    onAdd(newExam);
 
-    // Reset basics
     setCourseName('');
     setCourseCode('');
     setDate('');
@@ -53,96 +56,102 @@ export default function ExamForm({ onAddExam }: ExamFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <Card className="rounded-none w-full">
+      <CardHeader className="bg-primary border-b-2 border-border p-4">
+        <CardTitle className="text-primary-foreground font-head tracking-tight uppercase flex items-center gap-2">
+          <BookOpen className="w-5 h-5 shrink-0" /> Schedule Exam
+        </CardTitle>
+      </CardHeader>
       
-      {/* Course Info */}
-      <div className="flex flex-col gap-3">
-        <label className="text-sm font-medium text-text-secondary flex items-center gap-2">
-          <BookOpen className="w-4 h-4" /> Course Details
-        </label>
-        <div className="flex gap-3">
-          <input 
-            type="text" 
-            placeholder="Course Name *"
-            className="styled-input flex-1"
-            value={courseName}
-            onChange={(e) => setCourseName(e.target.value)}
-            required
-          />
-          <input 
-            type="text" 
-            placeholder="Code"
-            className="styled-input w-24 sm:w-32"
-            value={courseCode}
-            onChange={(e) => setCourseCode(e.target.value)}
-          />
-        </div>
-      </div>
+      <CardContent className="p-4 md:p-6 bg-card">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="uppercase text-xs font-bold tracking-wider">Course Info *</Label>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Input 
+                  placeholder="Course Name" 
+                  value={courseName}
+                  onChange={(e) => setCourseName(e.target.value)}
+                  className="flex-1 rounded-none border-2 border-border shadow-xs"
+                  required
+                />
+                <Input 
+                  placeholder="Code (Optional)" 
+                  value={courseCode}
+                  onChange={(e) => setCourseCode(e.target.value)}
+                  className="w-full sm:w-32 rounded-none border-2 border-border shadow-xs"
+                />
+              </div>
+            </div>
 
-      {/* Date & Time */}
-      <div className="flex flex-col gap-3">
-        <label className="text-sm font-medium text-text-secondary flex items-center gap-2">
-          <CalendarDays className="w-4 h-4" /> Date & Time
-        </label>
-        <input 
-          type="date" 
-          className="styled-input"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          required
-        />
-        <div className="flex items-center gap-2 text-text-secondary text-sm">
-          <Clock className="w-4 h-4 ml-1" />
-          <input 
-            type="time" 
-            className="styled-input flex-1"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-            required
-          />
-          <span>to</span>
-          <input 
-            type="time" 
-            className="styled-input flex-1"
-            value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
-            required
-          />
-        </div>
-      </div>
+            <div className="space-y-2">
+              <Label className="uppercase text-xs font-bold tracking-wider flex items-center gap-1">
+                <CalendarDays className="w-3 h-3" /> Date *
+              </Label>
+              <Input 
+                type="date" 
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full rounded-none border-2 border-border shadow-xs font-sans"
+                required
+              />
+            </div>
 
-      {/* Location */}
-      <div className="flex flex-col gap-3">
-        <label className="text-sm font-medium text-text-secondary flex items-center gap-2">
-          <MapPin className="w-4 h-4" /> Location
-        </label>
-        <input 
-          type="text" 
-          placeholder="Building, Room, Link... *"
-          className="styled-input"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          required
-        />
-      </div>
+            <div className="space-y-2">
+              <Label className="uppercase text-xs font-bold tracking-wider flex items-center gap-1">
+                <Clock className="w-3 h-3" /> Time *
+              </Label>
+              <div className="flex items-center gap-2">
+                <Input 
+                  type="time" 
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="w-full rounded-none border-2 border-border shadow-xs font-sans"
+                  required
+                />
+                <span className="font-head font-bold uppercase text-muted-foreground">To</span>
+                <Input 
+                  type="time" 
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="w-full rounded-none border-2 border-border shadow-xs font-sans"
+                  required
+                />
+              </div>
+            </div>
 
-      {/* Notes */}
-      <div className="flex flex-col gap-3">
-        <label className="text-sm font-medium text-text-secondary flex items-center gap-2">
-          <AlignLeft className="w-4 h-4" /> Extra Notes
-        </label>
-        <textarea 
-          placeholder="Things to bring, seat number..."
-          className="styled-input resize-none h-24"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-        />
-      </div>
+            <div className="space-y-2">
+              <Label className="uppercase text-xs font-bold tracking-wider flex items-center gap-1">
+                <MapPin className="w-3 h-3" /> Location *
+              </Label>
+              <Input 
+                placeholder="Building, Room, Link..." 
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full rounded-none border-2 border-border shadow-xs"
+                required
+              />
+            </div>
 
-      <button type="submit" className="styled-button mt-4 flex justify-center items-center gap-2">
-        Schedule Exam
-      </button>
+            <div className="space-y-2">
+              <Label className="uppercase text-xs font-bold tracking-wider flex items-center gap-1">
+                <AlignLeft className="w-3 h-3" /> Notes
+              </Label>
+              <textarea 
+                placeholder="Things to bring, seat number..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="w-full h-24 p-3 rounded-none border-2 border-border bg-background shadow-xs font-sans text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:shadow-sm resize-none"
+              />
+            </div>
+          </div>
 
-    </form>
+          <Button type="submit" className="w-full rounded-none py-6 text-lg uppercase shadow-[4px_4px_0_0_#000]">
+            Schedule It
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

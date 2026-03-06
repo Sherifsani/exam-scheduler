@@ -1,13 +1,17 @@
 import { format, parseISO } from 'date-fns';
-import { MapPin, Clock, Trash2, AlignLeft } from 'lucide-react';
+import { MapPin, Clock, Trash2, AlignLeft, Download } from 'lucide-react';
+import { Card, CardContent } from './retroui/Card';
+import { Button } from './retroui/Button';
+import { generateSchedulePDF } from '../utils/pdfGenerator';
 import type { Exam } from '../types';
 
 interface ExamListProps {
   exams: Exam[];
-  onDeleteExam: (id: string) => void;
+  onDelete: (id: string) => void;
+  currentTheme: "light" | "dark";
 }
 
-export default function ExamList({ exams, onDeleteExam }: ExamListProps) {
+export function ExamList({ exams, onDelete, currentTheme }: ExamListProps) {
   // Sort exams by date and start time
   const sortedExams = [...exams].sort((a, b) => {
     const dateTimeA = new Date(`${a.date}T${a.startTime}`);
@@ -15,69 +19,100 @@ export default function ExamList({ exams, onDeleteExam }: ExamListProps) {
     return dateTimeA.getTime() - dateTimeB.getTime();
   });
 
+  if (exams.length === 0) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center p-8 border-2 border-dashed border-border text-center opacity-60">
+        <Clock className="w-12 h-12 mb-4" />
+        <h3 className="font-head text-2xl uppercase tracking-tight">No Exams Scheduled</h3>
+        <p className="font-sans text-muted-foreground mt-2 max-w-sm">Use the form to add your upcoming exams, tests, or midterms.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-5">
-      {sortedExams.map((exam, index) => (
-        <div 
-          key={exam.id}
-          className="group relative flex flex-col sm:flex-row glass-panel-heavy rounded-2xl overflow-hidden animate-stagger-enter transition-transform hover:-translate-y-1 hover:shadow-2xl duration-300"
-          style={{ animationDelay: `${(index % 5) * 100}ms` }}
-        >
-          {/* Color strip accent */}
-          <div className={`h-2 sm:h-auto sm:w-2 ${exam.color || 'bg-accent-primary'} shrink-0`} />
-          
-          <div className="flex-1 p-5 sm:p-6 flex flex-col gap-4">
-            {/* Header: Title and Delete */}
-            <div className="flex justify-between items-start gap-4">
-              <div>
-                <h3 className="text-xl font-serif font-bold text-text-primary leading-tight">
-                  {exam.courseName}
-                </h3>
-                {exam.courseCode && (
-                  <span className="inline-block px-2 py-0.5 mt-2 bg-bg-secondary text-text-secondary text-xs font-bold rounded-md uppercase tracking-wider">
-                    {exam.courseCode}
-                  </span>
-                )}
-              </div>
-              
-              <button 
-                onClick={() => onDeleteExam(exam.id)}
-                className="text-text-secondary hover:text-rose-500 hover:bg-rose-500/10 p-2 rounded-full transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-                title="Delete exam"
-                aria-label="Delete exam"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Details Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1 text-sm text-text-secondary">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 shrink-0 text-accent-primary opacity-80" />
-                <span className="font-medium text-text-primary">
-                  {format(parseISO(exam.date), 'EEE, MMM d, yyyy')}
-                </span>
-                <span className="opacity-75 relative before:content-[''] before:inline-block before:w-1 before:h-1 before:bg-text-secondary before:rounded-full before:mx-2 before:align-middle">
-                  {exam.startTime} - {exam.endTime}
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 shrink-0 text-accent-primary opacity-80" />
-                <span className="truncate">{exam.location}</span>
-              </div>
-            </div>
-
-            {/* Notes Section */}
-            {exam.notes && (
-              <div className="mt-2 pt-3 border-t border-border-subtle flex items-start gap-2 text-sm text-text-secondary">
-                <AlignLeft className="w-4 h-4 shrink-0 mt-0.5 opacity-60" />
-                <p className="line-clamp-2">{exam.notes}</p>
-              </div>
-            )}
-          </div>
+    <div className="flex flex-col gap-6">
+      <div className="flex justify-between items-end border-b-4 border-border pb-4">
+        <div>
+          <h2 className="font-head text-4xl uppercase tracking-tight leading-none">Your Output</h2>
+          <p className="font-sans text-muted-foreground mt-2 font-medium">{exams.length} upcoming {exams.length === 1 ? 'event' : 'events'}</p>
         </div>
-      ))}
+        <Button 
+          variant="outline" 
+          onClick={() => generateSchedulePDF(exams, currentTheme)}
+          className="gap-2 rounded-none border-2 border-border shadow-[4px_4px_0_0_#000] hidden sm:flex"
+        >
+          <Download className="w-4 h-4" /> Export PDF
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {sortedExams.map((exam) => (
+          <Card 
+            key={exam.id}
+            className="rounded-none relative overflow-hidden group hover:shadow-[4px_4px_0_0_var(--border)] transition-shadow duration-200"
+          >
+            {/* Color accent bar on top edge */}
+            <div className={`absolute top-0 left-0 right-0 h-2 border-b-2 border-border ${exam.color || 'bg-primary'}`} />
+            
+            <CardContent className="p-5 pt-6 flex flex-col gap-4">
+              <div className="flex justify-between items-start gap-4">
+                <div className="pr-8">
+                  <h3 className="text-xl font-head uppercase font-bold leading-tight break-all">
+                    {exam.courseName}
+                  </h3>
+                  {exam.courseCode && (
+                    <span className="inline-block mt-2 px-2 py-1 bg-accent border-2 border-border text-xs font-head font-bold uppercase tracking-widest">
+                      {exam.courseCode}
+                    </span>
+                  )}
+                </div>
+                
+                <Button 
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => onDelete(exam.id)}
+                  className="rounded-none h-8 w-8 absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Remove exam"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <div className="flex flex-col gap-2 mt-2 font-sans text-sm text-foreground/80 font-medium">
+                <div className="flex items-center gap-3">
+                  <Clock className="w-4 h-4 shrink-0" />
+                  <span>
+                    {format(parseISO(exam.date), 'MMM d, yyyy')} <span className="mx-2 opacity-50">|</span> {exam.startTime} - {exam.endTime}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <MapPin className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{exam.location}</span>
+                </div>
+              </div>
+
+              {exam.notes && (
+                <div className="mt-2 p-3 bg-muted/20 border-2 border-border-subtle dashed font-sans text-sm">
+                  <div className="flex items-start gap-2">
+                    <AlignLeft className="w-4 h-4 shrink-0 mt-0.5" />
+                    <p className="line-clamp-2">{exam.notes}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+        
+        {/* Mobile only export button */}
+        <Button 
+          variant="outline" 
+          onClick={() => generateSchedulePDF(exams, currentTheme)}
+          className="gap-2 rounded-none border-2 border-border shadow-[4px_4px_0_0_#000] w-full sm:hidden"
+        >
+          <Download className="w-4 h-4" /> Export PDF
+        </Button>
+      </div>
     </div>
   );
 }

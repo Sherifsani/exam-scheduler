@@ -1,14 +1,30 @@
 import { useState, useEffect } from 'react';
 import { Moon, Sun, Monitor } from 'lucide-react';
+import { Button } from './retroui/Button';
 import type { Theme } from '../types';
 
 interface ThemeToggleProps {
   theme: Theme;
-  setTheme: (theme: Theme) => void;
+  onChange: (theme: Theme) => void;
 }
 
-export default function ThemeToggle({ theme, setTheme }: ThemeToggleProps) {
+export function ThemeToggle({ theme, onChange }: ThemeToggleProps) {
   const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+      root.classList.add(systemTheme);
+      return;
+    }
+
+    root.classList.add(theme);
+  }, [theme]);
 
   useEffect(() => {
     setMounted(true);
@@ -16,29 +32,35 @@ export default function ThemeToggle({ theme, setTheme }: ThemeToggleProps) {
 
   if (!mounted) return null;
 
-  const themes: { value: Theme; icon: React.ReactNode; label: string }[] = [
-    { value: 'light', icon: <Sun className="w-4 h-4" />, label: 'Light' },
-    { value: 'dark', icon: <Moon className="w-4 h-4" />, label: 'Dark' },
-    { value: 'system', icon: <Monitor className="w-4 h-4" />, label: 'System' },
-  ];
-
   return (
-    <div className="flex bg-bg-secondary p-1 rounded-full border border-border-subtle shadow-sm">
-      {themes.map((t) => (
-        <button
-          key={t.value}
-          onClick={() => setTheme(t.value)}
-          className={`flex items-center justify-center p-2 rounded-full transition-all duration-300 ${
-            theme === t.value
-              ? 'bg-bg-surface text-accent-primary shadow-sm scale-110'
-              : 'text-text-secondary hover:text-text-primary hover:bg-bg-surface/50'
-          }`}
-          aria-label={`Switch to ${t.label} theme`}
-          title={t.label}
-        >
-          {t.icon}
-        </button>
-      ))}
+    <div className="flex border-2 border-border bg-card p-1">
+      <Button
+        variant={theme === 'light' ? 'default' : 'ghost'}
+        size="icon"
+        className="rounded-none h-8 w-8"
+        onClick={() => onChange('light')}
+        title="Light theme"
+      >
+        <Sun className="h-4 w-4 shrink-0" />
+      </Button>
+      <Button
+        variant={theme === 'dark' ? 'default' : 'ghost'}
+        size="icon"
+        className="rounded-none h-8 w-8"
+        onClick={() => onChange('dark')}
+        title="Dark theme"
+      >
+        <Moon className="h-4 w-4 shrink-0" />
+      </Button>
+      <Button
+        variant={theme === 'system' ? 'default' : 'ghost'}
+        size="icon"
+        className="rounded-none h-8 w-8"
+        onClick={() => onChange('system')}
+        title="System default"
+      >
+        <Monitor className="h-4 w-4 shrink-0" />
+      </Button>
     </div>
   );
 }

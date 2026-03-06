@@ -18,15 +18,24 @@ export const generateSchedulePDF = (
 
   // Theme colors matching our aesthetic
   const isLight = currentTheme === "light";
+
+  // Brutalist RetroUI Palette
   const headerBgColor: [number, number, number] = isLight
-    ? [211, 97, 53]
-    : [178, 102, 255]; // Accent colors
+    ? [255, 219, 51] // Primary yellow
+    : [255, 219, 51]; // Primary yellow in dark mode too for accent
+  const headerTextColor: [number, number, number] = [0, 0, 0]; // Always black on primary
+
   const textColor: [number, number, number] = isLight
-    ? [26, 33, 29]
-    : [242, 235, 247];
+    ? [0, 0, 0] // Black
+    : [245, 245, 245]; // Off-white
+
   const pageBgColor: [number, number, number] = isLight
-    ? [247, 245, 240]
-    : [13, 10, 17];
+    ? [255, 255, 255]
+    : [26, 26, 26];
+
+  const borderColor: [number, number, number] = isLight
+    ? [0, 0, 0]
+    : [58, 58, 58];
 
   // Set page background
   doc.setFillColor(...pageBgColor);
@@ -39,9 +48,9 @@ export const generateSchedulePDF = (
   );
 
   doc.setTextColor(...textColor);
-  doc.setFontSize(22);
+  doc.setFontSize(26);
   doc.setFont("helvetica", "bold");
-  doc.text("Exam Schedule", 14, 22);
+  doc.text("EXAM SCHEDULE", 14, 22);
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
@@ -64,21 +73,25 @@ export const generateSchedulePDF = (
     theme: "grid",
     headStyles: {
       fillColor: headerBgColor,
-      textColor: [255, 255, 255],
+      textColor: headerTextColor,
       fontStyle: "bold",
+      fontSize: 12,
+      lineColor: borderColor,
+      lineWidth: 0.5,
     },
     bodyStyles: {
-      textColor: isLight ? [74, 86, 82] : [174, 161, 189], // text-secondary
-      fillColor: isLight ? [255, 255, 255] : [30, 23, 38], // bg-surface
+      textColor: textColor,
+      fillColor: isLight ? [255, 255, 255] : [36, 36, 36], // card bg
     },
     alternateRowStyles: {
-      fillColor: isLight ? [235, 231, 223] : [20, 16, 26], // bg-secondary
+      fillColor: isLight ? [250, 250, 250] : [42, 42, 42],
     },
     styles: {
-      cellPadding: 5,
+      cellPadding: 6,
       fontSize: 10,
-      lineColor: isLight ? [44, 85, 69] : [178, 102, 255],
-      lineWidth: 0.1,
+      lineColor: borderColor,
+      lineWidth: 0.5,
+      font: "helvetica",
     },
     margin: { top: 40 },
   });
